@@ -1,0 +1,1143 @@
+createOrReplace
+
+	table Calendario
+		dataCategory: Time
+
+		column Data
+			dataType: dateTime
+			isKey
+			formatString: Short Date
+			displayFolder: Gregoriano\Data
+			summarizeBy: none
+			sourceColumn: Data
+
+			annotation SummarizationSetBy = Automatic
+
+			annotation UnderlyingDateTimeDataType = Date
+
+		column DataIndice
+			dataType: int64
+			formatString: 0
+			displayFolder: Gregoriano\Data
+			summarizeBy: none
+			sourceColumn: DataIndice
+
+			annotation SummarizationSetBy = Automatic
+
+		column DiasParaHoje
+			dataType: int64
+			formatString: 0
+			displayFolder: Gregoriano\Dia
+			summarizeBy: none
+			sourceColumn: DiasParaHoje
+
+			annotation SummarizationSetBy = Automatic
+
+		column DataAtual
+			dataType: string
+			displayFolder: Gregoriano\Data
+			summarizeBy: none
+			sourceColumn: DataAtual
+
+			annotation SummarizationSetBy = Automatic
+
+		column Ano
+			dataType: int64
+			formatString: 0
+			displayFolder: Gregoriano\Ano
+			summarizeBy: none
+			sourceColumn: Ano
+
+			annotation SummarizationSetBy = Automatic
+
+		column AnoInicio
+			dataType: dateTime
+			formatString: Short Date
+			displayFolder: Gregoriano\Ano
+			summarizeBy: none
+			sourceColumn: AnoInicio
+
+			annotation SummarizationSetBy = Automatic
+
+			annotation UnderlyingDateTimeDataType = Date
+
+		column AnoFim
+			dataType: dateTime
+			formatString: Short Date
+			displayFolder: Gregoriano\Ano
+			summarizeBy: none
+			sourceColumn: AnoFim
+
+			annotation SummarizationSetBy = Automatic
+
+			annotation UnderlyingDateTimeDataType = Date
+
+		column AnoIndice
+			dataType: int64
+			formatString: 0
+			displayFolder: Gregoriano\Ano
+			summarizeBy: none
+			sourceColumn: AnoIndice
+
+			annotation SummarizationSetBy = Automatic
+
+		column AnoDescrescenteNome
+			dataType: string
+			displayFolder: Gregoriano\Ano
+			summarizeBy: none
+			sourceColumn: AnoDescrescenteNome
+			sortByColumn: AnoDescrescenteNum
+
+			changedProperty = SortByColumn
+
+			annotation SummarizationSetBy = Automatic
+
+		column AnoDescrescenteNum
+			dataType: int64
+			formatString: 0
+			displayFolder: Gregoriano\Ano
+			summarizeBy: none
+			sourceColumn: AnoDescrescenteNum
+
+			annotation SummarizationSetBy = Automatic
+
+		column AnosParaHoje
+			dataType: int64
+			formatString: 0
+			displayFolder: Gregoriano\Ano
+			summarizeBy: none
+			sourceColumn: AnosParaHoje
+
+			annotation SummarizationSetBy = Automatic
+
+		column AnoAtual
+			dataType: string
+			displayFolder: Gregoriano\Ano
+			summarizeBy: none
+			sourceColumn: AnoAtual
+
+			annotation SummarizationSetBy = Automatic
+
+		column DiaDoMes
+			dataType: int64
+			formatString: 0
+			displayFolder: Gregoriano\Dia
+			summarizeBy: none
+			sourceColumn: DiaDoMes
+
+			annotation SummarizationSetBy = Automatic
+
+		column DiaDoAno
+			dataType: int64
+			formatString: 0
+			displayFolder: Gregoriano\Dia
+			summarizeBy: none
+			sourceColumn: DiaDoAno
+
+			annotation SummarizationSetBy = Automatic
+
+		column DiaDaSemanaNum
+			dataType: int64
+			formatString: 0
+			displayFolder: Gregoriano\Dia
+			summarizeBy: none
+			sourceColumn: DiaDaSemanaNum
+
+			annotation SummarizationSetBy = Automatic
+
+		column DiaDaSemanaNome
+			dataType: string
+			displayFolder: Gregoriano\Dia
+			summarizeBy: none
+			sourceColumn: DiaDaSemanaNome
+			sortByColumn: DiaDaSemanaNum
+
+			changedProperty = SortByColumn
+
+			annotation SummarizationSetBy = Automatic
+
+		column DiaDaSemanaAbrev
+			dataType: string
+			displayFolder: Gregoriano\Dia
+			summarizeBy: none
+			sourceColumn: DiaDaSemanaAbrev
+			sortByColumn: DiaDaSemanaNum
+
+			changedProperty = SortByColumn
+
+			annotation SummarizationSetBy = Automatic
+
+		column MesNum
+			dataType: int64
+			formatString: 0
+			displayFolder: Gregoriano\Mês
+			summarizeBy: none
+			sourceColumn: MesNum
+
+			annotation SummarizationSetBy = Automatic
+
+		column MesNome
+			dataType: string
+			displayFolder: Gregoriano\Mês
+			summarizeBy: none
+			sourceColumn: MesNome
+			sortByColumn: MesNum
+
+			changedProperty = SortByColumn
+
+			annotation SummarizationSetBy = Automatic
+
+		column MesNomeAbrev
+			dataType: string
+			displayFolder: Gregoriano\Mês
+			summarizeBy: none
+			sourceColumn: MesNomeAbrev
+			sortByColumn: MesNum
+
+			changedProperty = SortByColumn
+
+			annotation SummarizationSetBy = Automatic
+
+		column MesAnoNome
+			dataType: string
+			displayFolder: Gregoriano\Mês
+			summarizeBy: none
+			sourceColumn: MesAnoNome
+			sortByColumn: MesAnoNum
+
+			changedProperty = SortByColumn
+
+			annotation SummarizationSetBy = Automatic
+
+		column MesAnoNum
+			dataType: int64
+			formatString: 0
+			displayFolder: Gregoriano\Mês
+			summarizeBy: none
+			sourceColumn: MesAnoNum
+
+			annotation SummarizationSetBy = Automatic
+
+		column MesDiaNum
+			dataType: int64
+			formatString: 0
+			displayFolder: Gregoriano\Mês
+			summarizeBy: none
+			sourceColumn: MesDiaNum
+
+			annotation SummarizationSetBy = Automatic
+
+		column MesDiaNome
+			dataType: string
+			displayFolder: Gregoriano\Mês
+			summarizeBy: none
+			sourceColumn: MesDiaNome
+			sortByColumn: MesDiaNum
+
+			changedProperty = SortByColumn
+
+			annotation SummarizationSetBy = Automatic
+
+		column MesInicio
+			dataType: dateTime
+			formatString: Short Date
+			displayFolder: Gregoriano\Mês
+			summarizeBy: none
+			sourceColumn: MesInicio
+
+			annotation SummarizationSetBy = Automatic
+
+			annotation UnderlyingDateTimeDataType = Date
+
+		column MesFim
+			dataType: dateTime
+			formatString: Short Date
+			displayFolder: Gregoriano\Mês
+			summarizeBy: none
+			sourceColumn: MesFim
+
+			annotation SummarizationSetBy = Automatic
+
+			annotation UnderlyingDateTimeDataType = Date
+
+		column MesIndice
+			dataType: int64
+			formatString: 0
+			displayFolder: Gregoriano\Mês
+			summarizeBy: none
+			sourceColumn: MesIndice
+
+			annotation SummarizationSetBy = Automatic
+
+		column MesesParaHoje
+			dataType: int64
+			formatString: 0
+			displayFolder: Gregoriano\Mês
+			summarizeBy: none
+			sourceColumn: MesesParaHoje
+
+			annotation SummarizationSetBy = Automatic
+
+		column MesAtual
+			dataType: string
+			displayFolder: Gregoriano\Mês
+			summarizeBy: none
+			sourceColumn: MesAtual
+			sortByColumn: MesNum
+
+			changedProperty = SortByColumn
+
+			annotation SummarizationSetBy = Automatic
+
+		column MesAtualAbrev
+			dataType: string
+			displayFolder: Gregoriano\Mês
+			summarizeBy: none
+			sourceColumn: MesAtualAbrev
+			sortByColumn: MesNum
+
+			changedProperty = SortByColumn
+
+			annotation SummarizationSetBy = Automatic
+
+		column MesAnoAtual
+			dataType: string
+			displayFolder: Gregoriano\Mês
+			summarizeBy: none
+			sourceColumn: MesAnoAtual
+			sortByColumn: MesAnoNum
+
+			changedProperty = SortByColumn
+
+			annotation SummarizationSetBy = Automatic
+
+		column TrimestreNum
+			dataType: int64
+			formatString: 0
+			displayFolder: Gregoriano\Trimestre
+			summarizeBy: none
+			sourceColumn: TrimestreNum
+
+			annotation SummarizationSetBy = Automatic
+
+		column TrimestreNome
+			dataType: string
+			displayFolder: Gregoriano\Trimestre
+			summarizeBy: none
+			sourceColumn: TrimestreNome
+
+			annotation SummarizationSetBy = Automatic
+
+		column TrimestreAnoNome
+			dataType: string
+			displayFolder: Gregoriano\Trimestre
+			summarizeBy: none
+			sourceColumn: TrimestreAnoNome
+			sortByColumn: TrimestreAnoNum
+
+			changedProperty = SortByColumn
+
+			annotation SummarizationSetBy = Automatic
+
+		column TrimestreAnoNum
+			dataType: int64
+			formatString: 0
+			displayFolder: Gregoriano\Trimestre
+			summarizeBy: none
+			sourceColumn: TrimestreAnoNum
+
+			annotation SummarizationSetBy = Automatic
+
+		column TrimestreInicio
+			dataType: dateTime
+			formatString: Short Date
+			displayFolder: Gregoriano\Trimestre
+			summarizeBy: none
+			sourceColumn: TrimestreInicio
+
+			annotation SummarizationSetBy = Automatic
+
+			annotation UnderlyingDateTimeDataType = Date
+
+		column TrimestreFim
+			dataType: dateTime
+			formatString: Short Date
+			displayFolder: Gregoriano\Trimestre
+			summarizeBy: none
+			sourceColumn: TrimestreFim
+
+			annotation SummarizationSetBy = Automatic
+
+			annotation UnderlyingDateTimeDataType = Date
+
+		column TrimestreIndice
+			dataType: int64
+			formatString: 0
+			displayFolder: Gregoriano\Trimestre
+			summarizeBy: none
+			sourceColumn: TrimestreIndice
+
+			annotation SummarizationSetBy = Automatic
+
+		column TrimestresParaHoje
+			dataType: int64
+			formatString: 0
+			displayFolder: Gregoriano\Trimestre
+			summarizeBy: none
+			sourceColumn: TrimestresParaHoje
+
+			annotation SummarizationSetBy = Automatic
+
+		column TrimestreAtual
+			dataType: string
+			displayFolder: Gregoriano\Trimestre
+			summarizeBy: none
+			sourceColumn: TrimestreAtual
+			sortByColumn: TrimestreNum
+
+			changedProperty = SortByColumn
+
+			annotation SummarizationSetBy = Automatic
+
+		column TrimestreAnoAtual
+			dataType: string
+			displayFolder: Gregoriano\Trimestre
+			summarizeBy: none
+			sourceColumn: TrimestreAnoAtual
+			sortByColumn: TrimestreAnoNum
+
+			changedProperty = SortByColumn
+
+			annotation SummarizationSetBy = Automatic
+
+		column MesDoTrimestre
+			dataType: int64
+			formatString: 0
+			displayFolder: Gregoriano\Mês
+			summarizeBy: none
+			sourceColumn: MesDoTrimestre
+
+			annotation SummarizationSetBy = Automatic
+
+		column SemanaAno
+			dataType: string
+			displayFolder: Gregoriano\Semana
+			summarizeBy: none
+			sourceColumn: SemanaAno
+
+			annotation SummarizationSetBy = Automatic
+
+		column SemanaDoAno
+			dataType: int64
+			formatString: 0
+			displayFolder: Gregoriano\Semana
+			summarizeBy: none
+			sourceColumn: SemanaDoAno
+
+			annotation SummarizationSetBy = Automatic
+
+		column SemanaDoMes
+			dataType: int64
+			formatString: 0
+			displayFolder: Gregoriano\Semana
+			summarizeBy: none
+			sourceColumn: SemanaDoMes
+
+			annotation SummarizationSetBy = Automatic
+
+		column SemanaInicio
+			dataType: dateTime
+			formatString: Short Date
+			displayFolder: Gregoriano\Semana
+			summarizeBy: none
+			sourceColumn: SemanaInicio
+
+			annotation SummarizationSetBy = Automatic
+
+			annotation UnderlyingDateTimeDataType = Date
+
+		column SemanaFim
+			dataType: dateTime
+			formatString: Short Date
+			displayFolder: Gregoriano\Semana
+			summarizeBy: none
+			sourceColumn: SemanaFim
+
+			annotation SummarizationSetBy = Automatic
+
+			annotation UnderlyingDateTimeDataType = Date
+
+		column SemanaIndice
+			dataType: int64
+			formatString: 0
+			displayFolder: Gregoriano\Semana
+			summarizeBy: none
+			sourceColumn: SemanaIndice
+
+			annotation SummarizationSetBy = Automatic
+
+		column SemanasParaHoje
+			dataType: int64
+			formatString: 0
+			displayFolder: Gregoriano\Semana
+			summarizeBy: none
+			sourceColumn: SemanasParaHoje
+
+			annotation SummarizationSetBy = Automatic
+
+		column SemanaAtual
+			dataType: string
+			displayFolder: Gregoriano\Semana
+			summarizeBy: none
+			sourceColumn: SemanaAtual
+			sortByColumn: SemanaAno
+
+			changedProperty = SortByColumn
+
+			annotation SummarizationSetBy = Automatic
+
+		column SemestreNum
+			dataType: int64
+			formatString: 0
+			displayFolder: Gregoriano\Semestre
+			summarizeBy: none
+			sourceColumn: SemestreNum
+
+			annotation SummarizationSetBy = Automatic
+
+		column SemestreAnoNome
+			dataType: string
+			displayFolder: Gregoriano\Semestre
+			summarizeBy: none
+			sourceColumn: SemestreAnoNome
+
+			annotation SummarizationSetBy = Automatic
+
+		column SemestreAnoNum
+			dataType: int64
+			formatString: 0
+			displayFolder: Gregoriano\Semestre
+			summarizeBy: none
+			sourceColumn: SemestreAnoNum
+
+			annotation SummarizationSetBy = Automatic
+
+		column SemestreInicio
+			dataType: dateTime
+			formatString: Short Date
+			displayFolder: Gregoriano\Semestre
+			summarizeBy: none
+			sourceColumn: SemestreInicio
+
+			annotation SummarizationSetBy = Automatic
+
+			annotation UnderlyingDateTimeDataType = Date
+
+		column SemestreFim
+			dataType: dateTime
+			formatString: Short Date
+			displayFolder: Gregoriano\Semestre
+			summarizeBy: none
+			sourceColumn: SemestreFim
+
+			annotation SummarizationSetBy = Automatic
+
+			annotation UnderlyingDateTimeDataType = Date
+
+		column SemestreIndice
+			dataType: int64
+			formatString: 0
+			displayFolder: Gregoriano\Semestre
+			summarizeBy: none
+			sourceColumn: SemestreIndice
+
+			annotation SummarizationSetBy = Automatic
+
+		column SemestresParaHoje
+			dataType: int64
+			formatString: 0
+			displayFolder: Gregoriano\Semestre
+			summarizeBy: none
+			sourceColumn: SemestresParaHoje
+
+			annotation SummarizationSetBy = Automatic
+
+		column SemestreAtual
+			dataType: string
+			displayFolder: Gregoriano\Semestre
+			summarizeBy: none
+			sourceColumn: SemestreAtual
+			sortByColumn: SemestreAnoNum
+
+			changedProperty = SortByColumn
+
+			annotation SummarizationSetBy = Automatic
+
+		column BimestreNum
+			dataType: int64
+			formatString: 0
+			displayFolder: Gregoriano\Bimestre
+			summarizeBy: none
+			sourceColumn: BimestreNum
+
+			annotation SummarizationSetBy = Automatic
+
+		column BimestreAnoNome
+			dataType: string
+			displayFolder: Gregoriano\Bimestre
+			summarizeBy: none
+			sourceColumn: BimestreAnoNome
+			sortByColumn: BimestreAnoNum
+
+			changedProperty = SortByColumn
+
+			annotation SummarizationSetBy = Automatic
+
+		column BimestreAnoNum
+			dataType: int64
+			formatString: 0
+			displayFolder: Gregoriano\Bimestre
+			summarizeBy: none
+			sourceColumn: BimestreAnoNum
+
+			annotation SummarizationSetBy = Automatic
+
+		column BimestreInicio
+			dataType: dateTime
+			formatString: Short Date
+			displayFolder: Gregoriano\Bimestre
+			summarizeBy: none
+			sourceColumn: BimestreInicio
+
+			annotation SummarizationSetBy = Automatic
+
+			annotation UnderlyingDateTimeDataType = Date
+
+		column BimestreFim
+			dataType: dateTime
+			formatString: Short Date
+			displayFolder: Gregoriano\Bimestre
+			summarizeBy: none
+			sourceColumn: BimestreFim
+
+			annotation SummarizationSetBy = Automatic
+
+			annotation UnderlyingDateTimeDataType = Date
+
+		column BimestreIndice
+			dataType: int64
+			formatString: 0
+			displayFolder: Gregoriano\Bimestre
+			summarizeBy: none
+			sourceColumn: BimestreIndice
+
+			annotation SummarizationSetBy = Automatic
+
+		column BimestresParaHoje
+			dataType: int64
+			formatString: 0
+			displayFolder: Gregoriano\Bimestre
+			summarizeBy: none
+			sourceColumn: BimestresParaHoje
+
+			annotation SummarizationSetBy = Automatic
+
+		column BimestreAtual
+			dataType: string
+			displayFolder: Gregoriano\Bimestre
+			summarizeBy: none
+			sourceColumn: BimestreAtual
+
+			annotation SummarizationSetBy = Automatic
+
+		column QuinzenaNum
+			dataType: int64
+			formatString: 0
+			displayFolder: Gregoriano\Quinzena
+			summarizeBy: none
+			sourceColumn: QuinzenaNum
+
+			annotation SummarizationSetBy = Automatic
+
+		column QuinzenaMesAnoNome
+			dataType: string
+			displayFolder: Gregoriano\Quinzena
+			summarizeBy: none
+			sourceColumn: QuinzenaMesAnoNome
+			sortByColumn: QuinzenaMesAnoNum
+
+			changedProperty = SortByColumn
+
+			annotation SummarizationSetBy = Automatic
+
+		column QuinzenaMesAnoNum
+			dataType: int64
+			formatString: 0
+			displayFolder: Gregoriano\Quinzena
+			summarizeBy: none
+			sourceColumn: QuinzenaMesAnoNum
+
+			annotation SummarizationSetBy = Automatic
+
+		column QuinzenaInicio
+			dataType: dateTime
+			formatString: Short Date
+			displayFolder: Gregoriano\Quinzena
+			summarizeBy: none
+			sourceColumn: QuinzenaInicio
+
+			annotation SummarizationSetBy = Automatic
+
+			annotation UnderlyingDateTimeDataType = Date
+
+		column QuinzenaFim
+			dataType: dateTime
+			formatString: Short Date
+			displayFolder: Gregoriano\Quinzena
+			summarizeBy: none
+			sourceColumn: QuinzenaFim
+
+			annotation SummarizationSetBy = Automatic
+
+			annotation UnderlyingDateTimeDataType = Date
+
+		column QuinzenaIndice
+			dataType: int64
+			formatString: 0
+			displayFolder: Gregoriano\Quinzena
+			summarizeBy: none
+			sourceColumn: QuinzenaIndice
+
+			annotation SummarizationSetBy = Automatic
+
+		column QuinzenaAtual
+			dataType: string
+			displayFolder: Gregoriano\Quinzena
+			summarizeBy: none
+			sourceColumn: QuinzenaAtual
+			sortByColumn: QuinzenaMesAnoNum
+
+			changedProperty = SortByColumn
+
+			annotation SummarizationSetBy = Automatic
+
+		column FechamentoRef
+			dataType: dateTime
+			formatString: Short Date
+			displayFolder: Gregoriano\Fechamento
+			summarizeBy: none
+			sourceColumn: FechamentoRef
+
+			annotation SummarizationSetBy = Automatic
+
+			annotation UnderlyingDateTimeDataType = Date
+
+		column FechamentoMesNome
+			dataType: string
+			displayFolder: Gregoriano\Fechamento
+			summarizeBy: none
+			sourceColumn: FechamentoMesNome
+			sortByColumn: FechamentoMesNum
+
+			changedProperty = SortByColumn
+
+			annotation SummarizationSetBy = Automatic
+
+		column FechamentoMesNomeAbrev
+			dataType: string
+			displayFolder: Gregoriano\Fechamento
+			summarizeBy: none
+			sourceColumn: FechamentoMesNomeAbrev
+			sortByColumn: FechamentoMesNum
+
+			changedProperty = SortByColumn
+
+			annotation SummarizationSetBy = Automatic
+
+		column FechamentoMesNum
+			dataType: int64
+			formatString: 0
+			displayFolder: Gregoriano\Fechamento
+			summarizeBy: none
+			sourceColumn: FechamentoMesNum
+
+			annotation SummarizationSetBy = Automatic
+
+		column FechamentoMesAnoNome
+			dataType: string
+			displayFolder: Gregoriano\Fechamento
+			summarizeBy: none
+			sourceColumn: FechamentoMesAnoNome
+			sortByColumn: FechamentoMesAnoNum
+
+			changedProperty = SortByColumn
+
+			annotation SummarizationSetBy = Automatic
+
+		column FechamentoMesAnoNum
+			dataType: int64
+			formatString: 0
+			displayFolder: Gregoriano\Fechamento
+			summarizeBy: none
+			sourceColumn: FechamentoMesAnoNum
+
+			annotation SummarizationSetBy = Automatic
+
+		column ISO_Semana
+			dataType: string
+			displayFolder: ISO
+			summarizeBy: none
+			sourceColumn: ISO_Semana
+
+			annotation SummarizationSetBy = Automatic
+
+		column ISO_SemanaDoAno
+			dataType: int64
+			formatString: 0
+			displayFolder: ISO
+			summarizeBy: none
+			sourceColumn: ISO_SemanaDoAno
+
+			annotation SummarizationSetBy = Automatic
+
+		column ISO_Ano
+			dataType: int64
+			formatString: 0
+			displayFolder: ISO
+			summarizeBy: none
+			sourceColumn: ISO_Ano
+
+			annotation SummarizationSetBy = Automatic
+
+		column ISO_SemanaInicio
+			dataType: dateTime
+			formatString: Short Date
+			displayFolder: ISO
+			summarizeBy: none
+			sourceColumn: ISO_SemanaInicio
+
+			annotation SummarizationSetBy = Automatic
+
+			annotation UnderlyingDateTimeDataType = Date
+
+		column ISO_SemanaFim
+			dataType: dateTime
+			formatString: Short Date
+			displayFolder: ISO
+			summarizeBy: none
+			sourceColumn: ISO_SemanaFim
+
+			annotation SummarizationSetBy = Automatic
+
+			annotation UnderlyingDateTimeDataType = Date
+
+		column ISO_SemanaIndice
+			dataType: int64
+			formatString: 0
+			displayFolder: ISO
+			summarizeBy: none
+			sourceColumn: ISO_SemanaIndice
+
+			annotation SummarizationSetBy = Automatic
+
+		column ISO_SemanasParaHoje
+			dataType: int64
+			formatString: 0
+			displayFolder: ISO
+			summarizeBy: none
+			sourceColumn: ISO_SemanasParaHoje
+
+			annotation SummarizationSetBy = Automatic
+
+		column ISO_SemanaAtual
+			dataType: string
+			displayFolder: ISO
+			summarizeBy: none
+			sourceColumn: ISO_SemanaAtual
+			sortByColumn: ISO_Semana
+
+			changedProperty = SortByColumn
+
+			annotation SummarizationSetBy = Automatic
+
+		column FY_AnoInicial
+			dataType: int64
+			formatString: 0
+			displayFolder: Fiscal\Ano
+			summarizeBy: none
+			sourceColumn: FY_AnoInicial
+
+			annotation SummarizationSetBy = Automatic
+
+		column FY_AnoFinal
+			dataType: int64
+			formatString: 0
+			displayFolder: Fiscal\Ano
+			summarizeBy: none
+			sourceColumn: FY_AnoFinal
+
+			annotation SummarizationSetBy = Automatic
+
+		column FY_Ano
+			dataType: string
+			displayFolder: Fiscal\Ano
+			summarizeBy: none
+			sourceColumn: FY_Ano
+
+			annotation SummarizationSetBy = Automatic
+
+		column FY_AnoInicio
+			dataType: dateTime
+			formatString: Short Date
+			displayFolder: Fiscal\Ano
+			summarizeBy: none
+			sourceColumn: FY_AnoInicio
+
+			annotation SummarizationSetBy = Automatic
+
+			annotation UnderlyingDateTimeDataType = Date
+
+		column FY_AnoFim
+			dataType: dateTime
+			formatString: Short Date
+			displayFolder: Fiscal\Ano
+			summarizeBy: none
+			sourceColumn: FY_AnoFim
+
+			annotation SummarizationSetBy = Automatic
+
+			annotation UnderlyingDateTimeDataType = Date
+
+		column FY_AnosParaHoje
+			dataType: int64
+			formatString: 0
+			displayFolder: Fiscal\Ano
+			summarizeBy: none
+			sourceColumn: FY_AnosParaHoje
+
+			annotation SummarizationSetBy = Automatic
+
+		column FY_AnoAtual
+			dataType: string
+			displayFolder: Fiscal\Ano
+			summarizeBy: none
+			sourceColumn: FY_AnoAtual
+			sortByColumn: FY_Ano
+
+			changedProperty = SortByColumn
+
+			annotation SummarizationSetBy = Automatic
+
+		column FY_MesNum
+			dataType: int64
+			formatString: 0
+			displayFolder: Fiscal\Mês
+			summarizeBy: none
+			sourceColumn: FY_MesNum
+
+			annotation SummarizationSetBy = Automatic
+
+		column FY_MesNome
+			dataType: string
+			displayFolder: Fiscal\Mês
+			summarizeBy: none
+			sourceColumn: FY_MesNome
+
+			annotation SummarizationSetBy = Automatic
+
+		column FY_MesNomeAbrev
+			dataType: string
+			displayFolder: Fiscal\Mês
+			summarizeBy: none
+			sourceColumn: FY_MesNomeAbrev
+
+			annotation SummarizationSetBy = Automatic
+
+		column FY_MesAnoNome
+			dataType: string
+			displayFolder: Fiscal\Mês
+			summarizeBy: none
+			sourceColumn: FY_MesAnoNome
+			sortByColumn: FY_MesAnoNum
+
+			changedProperty = SortByColumn
+
+			annotation SummarizationSetBy = Automatic
+
+		column FY_MesAnoNum
+			dataType: int64
+			formatString: 0
+			displayFolder: Fiscal\Mês
+			summarizeBy: none
+			sourceColumn: FY_MesAnoNum
+
+			annotation SummarizationSetBy = Automatic
+
+		column FY_MesesParaHoje
+			dataType: int64
+			formatString: 0
+			displayFolder: Fiscal\Mês
+			summarizeBy: none
+			sourceColumn: FY_MesesParaHoje
+
+			annotation SummarizationSetBy = Automatic
+
+		column FY_MesAtual
+			dataType: string
+			displayFolder: Fiscal\Mês
+			summarizeBy: none
+			sourceColumn: FY_MesAtual
+			sortByColumn: FY_MesAnoNum
+
+			changedProperty = SortByColumn
+
+			annotation SummarizationSetBy = Automatic
+
+		column FY_TrimestreNum
+			dataType: int64
+			formatString: 0
+			displayFolder: Fiscal\Trimestre
+			summarizeBy: none
+			sourceColumn: FY_TrimestreNum
+
+			annotation SummarizationSetBy = Automatic
+
+		column FY_TrimestreNome
+			dataType: string
+			displayFolder: Fiscal\Trimestre
+			summarizeBy: none
+			sourceColumn: FY_TrimestreNome
+
+			annotation SummarizationSetBy = Automatic
+
+		column FY_MesDoTrimestre
+			dataType: int64
+			formatString: 0
+			displayFolder: Fiscal\Mês
+			summarizeBy: none
+			sourceColumn: FY_MesDoTrimestre
+
+			annotation SummarizationSetBy = Automatic
+
+		column FY_TrimestreAnoNome
+			dataType: string
+			displayFolder: Fiscal\Trimestre
+			summarizeBy: none
+			sourceColumn: FY_TrimestreAnoNome
+
+			annotation SummarizationSetBy = Automatic
+
+		column FY_TrimestreAnoNum
+			dataType: int64
+			formatString: 0
+			displayFolder: Fiscal\Trimestre
+			summarizeBy: none
+			sourceColumn: FY_TrimestreAnoNum
+
+			annotation SummarizationSetBy = Automatic
+
+		column FY_TrimestreInicio
+			dataType: dateTime
+			formatString: Short Date
+			displayFolder: Fiscal\Trimestre
+			summarizeBy: none
+			sourceColumn: FY_TrimestreInicio
+
+			annotation SummarizationSetBy = Automatic
+
+			annotation UnderlyingDateTimeDataType = Date
+
+		column FY_TrimestreFim
+			dataType: dateTime
+			formatString: Short Date
+			displayFolder: Fiscal\Trimestre
+			summarizeBy: none
+			sourceColumn: FY_TrimestreFim
+
+			annotation SummarizationSetBy = Automatic
+
+			annotation UnderlyingDateTimeDataType = Date
+
+		column FY_TrimestresParaHoje
+			dataType: int64
+			formatString: 0
+			displayFolder: Fiscal\Trimestre
+			summarizeBy: none
+			sourceColumn: FY_TrimestresParaHoje
+
+			annotation SummarizationSetBy = Automatic
+
+		column FY_TrimestreAtual
+			dataType: string
+			displayFolder: Fiscal\Trimestre
+			summarizeBy: none
+			sourceColumn: FY_TrimestreAtual
+			sortByColumn: FY_TrimestreAnoNum
+
+			changedProperty = SortByColumn
+
+			annotation SummarizationSetBy = Automatic
+
+		column FY_DiaDoTrimestre
+			dataType: int64
+			formatString: 0
+			displayFolder: Fiscal\Trimestre
+			summarizeBy: none
+			sourceColumn: FY_DiaDoTrimestre
+
+			annotation SummarizationSetBy = Automatic
+
+		column Feriado
+			dataType: int64
+			formatString: 0
+			displayFolder: Feriados e Dias Úteis
+			summarizeBy: none
+			sourceColumn: Feriado
+
+			annotation SummarizationSetBy = Automatic
+
+		column FeriadoNome
+			dataType: string
+			displayFolder: Feriados e Dias Úteis
+			summarizeBy: none
+			sourceColumn: FeriadoNome
+
+			annotation SummarizationSetBy = Automatic
+
+		column DiaUtil
+			dataType: int64
+			formatString: 0
+			displayFolder: Feriados e Dias Úteis
+			summarizeBy: none
+			sourceColumn: DiaUtil
+
+			annotation SummarizationSetBy = Automatic
+
+		column ProximoDiaUtil
+			dataType: dateTime
+			formatString: Short Date
+			displayFolder: Feriados e Dias Úteis
+			summarizeBy: none
+			sourceColumn: ProximoDiaUtil
+
+			annotation SummarizationSetBy = Automatic
+
+			annotation UnderlyingDateTimeDataType = Date
+
+		column FechamentoAno
+			dataType: int64
+			formatString: 0
+			displayFolder: Gregoriano\Fechamento
+			summarizeBy: none
+			sourceColumn: FechamentoAno
+
+			annotation SummarizationSetBy = User
+
+		column FechamentoIndice
+			dataType: int64
+			formatString: 0
+			displayFolder: Gregoriano\Fechamento
+			summarizeBy: none
+			sourceColumn: FechamentoIndice
+
+			annotation SummarizationSetBy = User

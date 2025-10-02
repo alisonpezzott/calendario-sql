@@ -1,0 +1,122 @@
+
+		calendar Gregoriano
+
+			calendarColumnGroup = year
+				primaryColumn: Ano
+				associatedColumn: AnoAtual
+				associatedColumn: AnoDescrescenteNome
+				associatedColumn: AnoDescrescenteNum
+
+			calendarColumnGroup = quarter
+				primaryColumn: TrimestreAnoNum
+				associatedColumn: TrimestreAnoNome
+				associatedColumn: TrimestreAnoAtual
+
+			calendarColumnGroup = quarterOfYear
+				primaryColumn: TrimestreNum
+				associatedColumn: TrimestreNome
+
+			calendarColumnGroup = month
+				primaryColumn: MesAnoNum
+				associatedColumn: MesAnoNome
+				associatedColumn: MesAnoAtual
+
+			calendarColumnGroup = monthOfYear
+				primaryColumn: MesNum
+				associatedColumn: MesNome
+				associatedColumn: MesNomeAbrev
+
+			calendarColumnGroup = monthOfQuarter
+				primaryColumn: MesDoTrimestre
+
+			calendarColumnGroup = weekOfMonth
+				primaryColumn: SemanaDoMes
+
+			calendarColumnGroup = date
+				primaryColumn: Data
+
+			calendarColumnGroup = dayOfYear
+				primaryColumn: DiaDoAno
+
+			calendarColumnGroup = dayOfMonth
+				primaryColumn: DiaDoMes
+
+			calendarColumnGroup = dayOfWeek
+				primaryColumn: DiaDaSemanaNum
+				associatedColumn: DiaDaSemanaNome
+				associatedColumn: DiaDaSemanaAbrev
+
+		calendar 'Semanal - Gregoriano'
+
+			calendarColumnGroup = year
+				primaryColumn: Ano
+				associatedColumn: AnoDescrescenteNome
+				associatedColumn: AnoDescrescenteNum
+				associatedColumn: AnoAtual
+
+			calendarColumnGroup = week
+				primaryColumn: SemanaAno
+				associatedColumn: SemanaAtual
+
+			calendarColumnGroup = weekOfYear
+				primaryColumn: SemanaDoAno
+
+			calendarColumnGroup = date
+				primaryColumn: Data
+				associatedColumn: DataAtual
+
+		calendar 'Semanal - ISO'
+
+			calendarColumnGroup = year
+				primaryColumn: ISO_Ano
+
+			calendarColumnGroup = week
+				primaryColumn: ISO_Semana
+				associatedColumn: ISO_SemanaAtual
+
+			calendarColumnGroup = weekOfYear
+				primaryColumn: ISO_SemanaDoAno
+
+			calendarColumnGroup = date
+				primaryColumn: Data
+				associatedColumn: DataAtual
+
+		calendar Fiscal
+
+			calendarColumnGroup = year
+				primaryColumn: FY_Ano
+				associatedColumn: FY_AnoInicial
+				associatedColumn: FY_AnoFinal
+				associatedColumn: FY_AnoAtual
+
+			calendarColumnGroup = quarter
+				primaryColumn: FY_TrimestreAnoNum
+				associatedColumn: FY_TrimestreAnoNome
+				associatedColumn: FY_TrimestreAtual
+
+			calendarColumnGroup = quarterOfYear
+				primaryColumn: FY_TrimestreNum
+
+			calendarColumnGroup = month
+				primaryColumn: FY_MesAnoNum
+				associatedColumn: FY_MesAnoNome
+				associatedColumn: FY_MesAtual
+
+			calendarColumnGroup = monthOfYear
+				primaryColumn: FY_MesNum
+				associatedColumn: FY_MesNome
+				associatedColumn: FY_MesNomeAbrev
+
+			calendarColumnGroup = monthOfQuarter
+				primaryColumn: FY_MesDoTrimestre
+
+			calendarColumnGroup = date
+				primaryColumn: Data
+				associatedColumn: DataAtual
+
+			calendarColumnGroup = dayOfQuarter
+				primaryColumn: FY_DiaDoTrimestre
+
+			calendarColumnGroup = dayOfMonth
+				primaryColumn: DiaDoMes
+
