@@ -19,4 +19,4 @@ Testado com:
 
 5. Habilitar o recurso em **Opções > Global > Recursos de visualização > Inteligência de Tempo DAX aprimorada**. Crie uma nova aba do TMDL view e arraste a tabela **Calendario** para o editor. Role até o final. Copie o script contido [**src/tmdl/Passo_2_Aprimorado.tmdl**](./src/tmdl/Passo_2_Aprimorado.tmdl) e cole abaixo de tudo. Aplique. Pronto agora seu modelo está pronto para utlizar a inteligência de tempo aprimorada. Confira a documentação em:   https://learn.microsoft.com/pt-br/power-bi/transform-model/desktop-time-intelligence#calendar-based-time-intelligence-preview 
 
-Instrução em vídeo aqui: em breve
+Instrução em vídeo aqui: [https://youtu.be/w2T7PBikhN4](https://youtu.be/w2T7PBikhN4)
