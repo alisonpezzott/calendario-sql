@@ -71,9 +71,9 @@ BEGIN
         -- =================================================================
         PRINT 'Recriando tabela dbo.Calendario...';
         
-        DROP TABLE IF EXISTS dbo.Calendario;
+        DROP TABLE IF EXISTS dbo.CalendarioStaging;
         
-        CREATE TABLE dbo.Calendario (
+        CREATE TABLE dbo.CalendarioStaging (
             Data DATE NOT NULL PRIMARY KEY,
             -- Campos base
             Ano INT NULL,
@@ -95,7 +95,7 @@ BEGIN
             FROM Numbers
             WHERE n < DATEDIFF(DAY, @DataInicial, @DataFinal)
         )
-        INSERT INTO dbo.Calendario (Data, Ano, Mes, Dia, MesNome, MesNomeAbrev, DiaDaSemanaNome, DiaDaSemanaAbrev)
+        INSERT INTO dbo.CalendarioStaging (Data, Ano, Mes, Dia, MesNome, MesNomeAbrev, DiaDaSemanaNome, DiaDaSemanaAbrev)
         SELECT 
             DATEADD(DAY, n, @DataInicial) AS Data,
             YEAR(DATEADD(DAY, n, @DataInicial)) AS Ano,
@@ -116,7 +116,7 @@ BEGIN
         -- =================================================================
         PRINT 'Adicionando colunas calculadas...';
         
-        ALTER TABLE dbo.Calendario ADD
+        ALTER TABLE dbo.CalendarioStaging ADD
             -- Índices e referências
             DataIndice INT NULL,
             DiasParaHoje INT NULL,
@@ -262,15 +262,15 @@ BEGIN
         -- Primeiro, preencher o DataIndice usando CTE
         ;WITH IndiceCTE AS (
             SELECT Data, ROW_NUMBER() OVER (ORDER BY Data) as RowNum
-            FROM dbo.Calendario
+            FROM dbo.CalendarioStaging
         )
         UPDATE c SET
             DataIndice = i.RowNum
-        FROM dbo.Calendario c
+        FROM dbo.CalendarioStaging c
         INNER JOIN IndiceCTE i ON c.Data = i.Data;
         
         -- Depois, preencher os demais campos
-        UPDATE dbo.Calendario SET
+        UPDATE dbo.CalendarioStaging SET
             -- Campos de referência temporal
             DiasParaHoje = DATEDIFF(DAY, Data, @DataAtual),
             DataAtual = IIF(Data = @DataAtual, 'Hoje', CONVERT(VARCHAR(20), Data, 103)),
@@ -308,7 +308,7 @@ BEGIN
         -- =================================================================
         PRINT 'Calculando períodos (trimestre, semestre, etc.)...';
         
-        UPDATE dbo.Calendario SET
+        UPDATE dbo.CalendarioStaging SET
             -- Trimestre
             TrimestreNum = DATEPART(QUARTER, Data),
             TrimestreNome = CONCAT('T', DATEPART(QUARTER, Data)),
@@ -386,7 +386,7 @@ BEGIN
             MONTH(IIF(Dia <= @DataFechamento, 
                 DATEFROMPARTS(Ano, Mes, @DataFechamento), 
                 DATEADD(MONTH, 1, DATEFROMPARTS(Ano, Mes, @DataFechamento)))) AS FechamentoMes
-        FROM dbo.Calendario;
+        FROM dbo.CalendarioStaging;
         
         UPDATE c SET
             -- Fechamento (usando tabela auxiliar para otimização)
@@ -439,7 +439,7 @@ BEGIN
                     END, ' S', RIGHT('00' + CAST(DATEPART(ISO_WEEK, c.Data) AS VARCHAR(2)), 2)
                 )
             )
-        FROM dbo.Calendario c
+        FROM dbo.CalendarioStaging c
         INNER JOIN @FechamentoCalc f ON c.Data = f.Data;
         
         -- =================================================================
@@ -469,7 +469,7 @@ BEGIN
                 ELSE ((Mes + (12 - @MesInicioAnoFiscal)) / 3) + 1 
             END AS FY_TrimestreNumFiscal,
             ((Mes - @MesInicioAnoFiscal + 12) % 3) + 1 AS FY_MesDoTrimestreFiscal
-        FROM dbo.Calendario;
+        FROM dbo.CalendarioStaging;
         
         -- Calcular trimestre fiscal atual para comparações
         DECLARE @CurrentFYTrimNum INT = CASE 
@@ -543,7 +543,7 @@ BEGIN
                     DATEFROMPARTS(CASE WHEN c.Mes >= @MesInicioAnoFiscal THEN c.Ano ELSE c.Ano - 1 END, @MesInicioAnoFiscal, 1)),
                 c.Data
             ) + 1
-        FROM dbo.Calendario c
+        FROM dbo.CalendarioStaging c
         INNER JOIN @FiscalCalc f ON c.Data = f.Data;
         
         -- =================================================================
@@ -556,7 +556,7 @@ BEGIN
         
         -- Feriados fixos
         ;WITH Anos AS (
-            SELECT DISTINCT Ano FROM dbo.Calendario
+            SELECT DISTINCT Ano FROM dbo.CalendarioStaging
         )
         INSERT INTO @Feriados (Data, Nome)
         SELECT DATEFROMPARTS(a.Ano, f.Mes, f.Dia), f.Feriado
@@ -565,7 +565,7 @@ BEGIN
         
         -- Feriados móveis (Páscoa)
         ;WITH Anos AS (
-            SELECT DISTINCT Ano FROM dbo.Calendario
+            SELECT DISTINCT Ano FROM dbo.CalendarioStaging
         ),
         Pascoa AS (
             SELECT 
@@ -587,13 +587,13 @@ BEGIN
         UPDATE c SET
             c.Feriado = 1,
             c.FeriadoNome = f.Nome
-        FROM dbo.Calendario c
+        FROM dbo.CalendarioStaging c
         INNER JOIN @Feriados f ON f.Data = c.Data;
         
         -- Calcular dias úteis
         PRINT 'Calculando dias úteis...';
         
-        UPDATE dbo.Calendario SET
+        UPDATE dbo.CalendarioStaging SET
             DiaUtil = CASE
                 WHEN DiaDaSemanaNome IN (N'sábado', N'domingo') THEN 0
                 WHEN ISNULL(Feriado, 0) = 1 THEN 0
@@ -603,22 +603,151 @@ BEGIN
         -- Próximo dia útil (otimizado com OUTER APPLY)
         UPDATE c SET
             ProximoDiaUtil = prox.Data
-        FROM dbo.Calendario c
+        FROM dbo.CalendarioStaging c
         OUTER APPLY (
             SELECT TOP 1 Data
-            FROM dbo.Calendario c2
+            FROM dbo.CalendarioStaging c2
             WHERE c2.Data > c.Data AND c2.DiaUtil = 1
             ORDER BY c2.Data
         ) prox;
         
         -- Tornar DataIndice NOT NULL
-        ALTER TABLE dbo.Calendario ALTER COLUMN DataIndice INT NOT NULL;
+        ALTER TABLE dbo.CalendarioStaging ALTER COLUMN DataIndice INT NOT NULL;
 
-        -- Deleta as colunas primárias Dia e Mes
-        ALTER TABLE dbo.Calendario DROP COLUMN Dia, Mes;
-        
         -- =================================================================
-        -- ETAPA 8: Estatísticas e finalização
+        -- ETAPA 8: Gerar tabela final dbo.Calendario sem Dia/Mes
+        -- =================================================================
+        PRINT 'Gerando tabela final dbo.Calendario sem colunas Dia e Mes...';
+
+        DROP TABLE IF EXISTS dbo.Calendario;
+
+        SELECT 
+            Data,
+            Ano,
+            MesNome,
+            MesNomeAbrev,
+            DiaDaSemanaNome,
+            DiaDaSemanaAbrev,
+            DataIndice,
+            DiasParaHoje,
+            DataAtual,
+            AnoInicio,
+            AnoFim,
+            AnoIndice,
+            AnoDescrescenteNome,
+            AnoDescrescenteNum,
+            AnosParaHoje,
+            AnoAtual,
+            DiaDoMes,
+            DiaDoAno,
+            DiaDaSemanaNum,
+            MesNum,
+            MesAnoNome,
+            MesAnoNum,
+            MesDiaNum,
+            MesDiaNome,
+            MesInicio,
+            MesFim,
+            MesIndice,
+            MesesParaHoje,
+            MesAtual,
+            MesAtualAbrev,
+            MesAnoAtual,
+            TrimestreNum,
+            TrimestreNome,
+            TrimestreAnoNome,
+            TrimestreAnoNum,
+            TrimestreInicio,
+            TrimestreFim,
+            TrimestreIndice,
+            TrimestresParaHoje,
+            TrimestreAtual,
+            TrimestreAnoAtual,
+            MesDoTrimestre,
+            SemanaDoAno,
+            SemanaAno,
+            SemanaDoMes,
+            SemanaInicio,
+            SemanaFim,
+            SemanaIndice,
+            SemanasParaHoje,
+            SemanaAtual,
+            SemestreNum,
+            SemestreAnoNome,
+            SemestreAnoNum,
+            SemestreInicio,
+            SemestreFim,
+            SemestreIndice,
+            SemestresParaHoje,
+            SemestreAtual,
+            BimestreNum,
+            BimestreAnoNome,
+            BimestreAnoNum,
+            BimestreInicio,
+            BimestreFim,
+            BimestreIndice,
+            BimestresParaHoje,
+            BimestreAtual,
+            QuinzenaNum,
+            QuinzenaMesAnoNome,
+            QuinzenaMesAnoNum,
+            QuinzenaInicio,
+            QuinzenaFim,
+            QuinzenaIndice,
+            QuinzenaAtual,
+            FechamentoAno,
+            FechamentoRef,
+            FechamentoIndice,
+            FechamentoMesNome,
+            FechamentoMesNomeAbrev,
+            FechamentoMesNum,
+            FechamentoMesAnoNome,
+            FechamentoMesAnoNum,
+            ISO_Semana,
+            ISO_SemanaDoAno,
+            ISO_Ano,
+            ISO_SemanaInicio,
+            ISO_SemanaFim,
+            ISO_SemanaIndice,
+            ISO_SemanasParaHoje,
+            ISO_SemanaAtual,
+            FY_AnoInicial,
+            FY_AnoFinal,
+            FY_Ano,
+            FY_AnoInicio,
+            FY_AnoFim,
+            FY_AnosParaHoje,
+            FY_AnoAtual,
+            FY_MesNum,
+            FY_MesNome,
+            FY_MesNomeAbrev,
+            FY_MesAnoNome,
+            FY_MesAnoNum,
+            FY_MesesParaHoje,
+            FY_MesAtual,
+            FY_TrimestreNum,
+            FY_TrimestreNome,
+            FY_MesDoTrimestre,
+            FY_TrimestreAnoNome,
+            FY_TrimestreAnoNum,
+            FY_TrimestreInicio,
+            FY_TrimestreFim,
+            FY_TrimestresParaHoje,
+            FY_TrimestreAtual,
+            FY_DiaDoTrimestre,
+            Feriado,
+            FeriadoNome,
+            DiaUtil,
+            ProximoDiaUtil
+        INTO dbo.Calendario
+        FROM dbo.CalendarioStaging;
+
+        -- Garantir DataIndice NOT NULL e PK na tabela final
+        ALTER TABLE dbo.Calendario ALTER COLUMN DataIndice INT NOT NULL;
+        ALTER TABLE dbo.Calendario ADD CONSTRAINT PK_Calendario PRIMARY KEY CLUSTERED (Data);
+
+        -- =================================================================
+        -- ETAPA 9: Estatísticas e finalização
         -- =================================================================
         SELECT @TotalRegistros = COUNT(*) FROM dbo.Calendario;
         
@@ -652,7 +781,6 @@ BEGIN
         UNION
         SELECT * FROM ultimas
         ORDER BY Data ASC;
-
 
     END TRY
     BEGIN CATCH
