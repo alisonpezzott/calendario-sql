@@ -54,8 +54,8 @@ BEGIN
         DECLARE @AnoFiscalAtual INT = YEAR(DATEADD(MONTH, 12 - @MesInicioAnoFiscal + 1, @DataAtual));
         
         -- Cria tabela de feriados fixos
-        DECLARE @FeriadosFixos TABLE (Dia INT, Mes INT, Feriado VARCHAR(100));
-        INSERT INTO @FeriadosFixos (Dia, Mes, Feriado) VALUES
+        DECLARE @FeriadosFixos TABLE (DiaDoMes INT, MesNum INT, Feriado VARCHAR(100));
+        INSERT INTO @FeriadosFixos (DiaDoMes, MesNum, Feriado) VALUES
             ( 1,  1, 'Confraternização Universal'),
             (21,  4, 'Tiradentes'),
             ( 1,  5, 'Dia do Trabalhador'),
@@ -71,14 +71,14 @@ BEGIN
         -- =================================================================
         PRINT 'Recriando tabela dbo.Calendario...';
         
-        DROP TABLE IF EXISTS dbo.CalendarioStaging;
+        DROP TABLE IF EXISTS dbo.Calendario;
         
-        CREATE TABLE dbo.CalendarioStaging (
+        CREATE TABLE dbo.Calendario (
             Data DATE NOT NULL PRIMARY KEY,
             -- Campos base
             Ano INT NULL,
-            Mes INT NULL, 
-            Dia INT NULL,
+            MesNum INT NULL, 
+            DiaDoMes INT NULL,
             MesNome VARCHAR(20) NULL,
             MesNomeAbrev VARCHAR(3) NULL,
             DiaDaSemanaNome VARCHAR(20) NULL,
@@ -95,12 +95,12 @@ BEGIN
             FROM Numbers
             WHERE n < DATEDIFF(DAY, @DataInicial, @DataFinal)
         )
-        INSERT INTO dbo.CalendarioStaging (Data, Ano, Mes, Dia, MesNome, MesNomeAbrev, DiaDaSemanaNome, DiaDaSemanaAbrev)
+        INSERT INTO dbo.Calendario (Data, Ano, MesNum, DiaDoMes, MesNome, MesNomeAbrev, DiaDaSemanaNome, DiaDaSemanaAbrev)
         SELECT 
             DATEADD(DAY, n, @DataInicial) AS Data,
             YEAR(DATEADD(DAY, n, @DataInicial)) AS Ano,
-            MONTH(DATEADD(DAY, n, @DataInicial)) AS Mes,
-            DAY(DATEADD(DAY, n, @DataInicial)) AS Dia,
+            MONTH(DATEADD(DAY, n, @DataInicial)) AS MesNum,
+            DAY(DATEADD(DAY, n, @DataInicial)) AS DiaNum,
             DATENAME(MONTH, DATEADD(DAY, n, @DataInicial)) AS MesNome,
             LEFT(DATENAME(MONTH, DATEADD(DAY, n, @DataInicial)), 3) AS MesNomeAbrev,
             DATENAME(WEEKDAY, DATEADD(DAY, n, @DataInicial)) AS DiaDaSemanaNome,
@@ -116,7 +116,7 @@ BEGIN
         -- =================================================================
         PRINT 'Adicionando colunas calculadas...';
         
-        ALTER TABLE dbo.CalendarioStaging ADD
+        ALTER TABLE dbo.Calendario ADD
             -- Índices e referências
             DataIndice INT NULL,
             DiasParaHoje INT NULL,
@@ -132,12 +132,10 @@ BEGIN
             AnoAtual VARCHAR(20) NULL,
             
             -- Campos de dia
-            DiaDoMes INT NULL,
             DiaDoAno INT NULL,
             DiaDaSemanaNum INT NULL,
             
             -- Campos de mês
-            MesNum INT NULL,
             MesAnoNome VARCHAR(20) NULL,
             MesAnoNum INT NULL,
             MesDiaNum INT NULL,
@@ -262,15 +260,15 @@ BEGIN
         -- Primeiro, preencher o DataIndice usando CTE
         ;WITH IndiceCTE AS (
             SELECT Data, ROW_NUMBER() OVER (ORDER BY Data) as RowNum
-            FROM dbo.CalendarioStaging
+            FROM dbo.Calendario
         )
         UPDATE c SET
             DataIndice = i.RowNum
-        FROM dbo.CalendarioStaging c
+        FROM dbo.Calendario c
         INNER JOIN IndiceCTE i ON c.Data = i.Data;
         
         -- Depois, preencher os demais campos
-        UPDATE dbo.CalendarioStaging SET
+        UPDATE dbo.Calendario SET
             -- Campos de referência temporal
             DiasParaHoje = DATEDIFF(DAY, Data, @DataAtual),
             DataAtual = IIF(Data = @DataAtual, 'Hoje', CONVERT(VARCHAR(20), Data, 103)),
@@ -285,30 +283,28 @@ BEGIN
             AnoAtual = IIF(Ano = @AnoAtual, 'Ano Atual', CAST(Ano AS VARCHAR(4))),
             
             -- Campos de dia
-            DiaDoMes = Dia,
             DiaDoAno = DATEPART(DAYOFYEAR, Data),
             DiaDaSemanaNum = ((DATEPART(WEEKDAY, Data) + 7 - @InicioSemana) % 7) + 1,
             
             -- Campos de mês
-            MesNum = Mes,
             MesAnoNome = CONCAT(Ano, ' ', MesNomeAbrev),
-            MesAnoNum = Ano * 100 + Mes,
-            MesDiaNum = Mes * 100 + Dia,
-            MesDiaNome = CONCAT(MesNomeAbrev, ' ', Dia),
-            MesInicio = DATEFROMPARTS(Ano, Mes, 1),
+            MesAnoNum = Ano * 100 + MesNum,
+            MesDiaNum = MesNum * 100 + DiaDoMes,
+            MesDiaNome = CONCAT(MesNomeAbrev, ' ', DiaDoMes),
+            MesInicio = DATEFROMPARTS(Ano, MesNum, 1),
             MesFim = EOMONTH(Data),
-            MesIndice = 12 * (Ano - @AnoInicial) + Mes,
+            MesIndice = 12 * (Ano - @AnoInicial) + MesNum,
             MesesParaHoje = DATEDIFF(MONTH, Data, @DataAtual),
-            MesAtual = IIF(Mes = @MesAtual AND Ano = @AnoAtual, 'Mês Atual', MesNome),
-            MesAtualAbrev = IIF(Mes = @MesAtual AND Ano = @AnoAtual, 'Mês Atual', MesNomeAbrev),
-            MesAnoAtual = IIF(Mes = @MesAtual AND Ano = @AnoAtual, 'Mês Atual', CONCAT(Ano, ' ', MesNomeAbrev));
+            MesAtual = IIF(MesNum = @MesAtual AND Ano = @AnoAtual, 'Mês Atual', MesNome),
+            MesAtualAbrev = IIF(MesNum = @MesAtual AND Ano = @AnoAtual, 'Mês Atual', MesNomeAbrev),
+            MesAnoAtual = IIF(MesNum = @MesAtual AND Ano = @AnoAtual, 'Mês Atual', CONCAT(Ano, ' ', MesNomeAbrev));
         
         -- =================================================================
         -- ETAPA 4: Preencher campos de períodos
         -- =================================================================
         PRINT 'Calculando períodos (trimestre, semestre, etc.)...';
         
-        UPDATE dbo.CalendarioStaging SET
+        UPDATE dbo.Calendario SET
             -- Trimestre
             TrimestreNum = DATEPART(QUARTER, Data),
             TrimestreNome = CONCAT('T', DATEPART(QUARTER, Data)),
@@ -320,12 +316,12 @@ BEGIN
             TrimestresParaHoje = (Ano * 4 + DATEPART(QUARTER, Data)) - (@AnoAtual * 4 + DATEPART(QUARTER, @DataAtual)),
             TrimestreAtual = IIF(DATEPART(QUARTER, Data) = DATEPART(QUARTER, @DataAtual) AND Ano = @AnoAtual, 'Trimestre Atual', CONCAT('T', DATEPART(QUARTER, Data))),
             TrimestreAnoAtual = IIF(DATEPART(QUARTER, Data) = DATEPART(QUARTER, @DataAtual) AND Ano = @AnoAtual, 'Trimestre Atual', CONCAT(Ano, ' T', DATEPART(QUARTER, Data))),
-            MesDoTrimestre = Mes - (DATEPART(QUARTER, Data) - 1) * 3,
+            MesDoTrimestre = MesNum - (DATEPART(QUARTER, Data) - 1) * 3,
             
             -- Semana
             SemanaDoAno = DATEPART(WEEK, Data),
             SemanaAno = CONCAT(Ano, ' S', RIGHT('00' + CAST(DATEPART(WEEK, Data) AS VARCHAR(2)), 2)),
-            SemanaDoMes = DATEPART(WEEK, Data) - DATEPART(WEEK, DATEFROMPARTS(Ano, Mes, 1)) + 1,
+            SemanaDoMes = DATEPART(WEEK, Data) - DATEPART(WEEK, DATEFROMPARTS(Ano, MesNum, 1)) + 1,
             SemanaInicio = DATEADD(DAY, 1 - ((DATEPART(WEEKDAY, Data) + 7 - @InicioSemana) % 7), Data),
             SemanaFim = DATEADD(DAY, 7 - ((DATEPART(WEEKDAY, Data) + 7 - @InicioSemana) % 7), Data),
             SemanaIndice = 52 * (Ano - @AnoInicial) + DATEPART(WEEK, Data),
@@ -333,33 +329,33 @@ BEGIN
             SemanaAtual = IIF(Ano = @AnoAtual AND DATEPART(WEEK, Data) = DATEPART(WEEK, @DataAtual), 'Semana Atual', CONCAT(Ano, ' S', RIGHT('00' + CAST(DATEPART(WEEK, Data) AS VARCHAR(2)), 2))),
             
             -- Semestre
-            SemestreNum = ((Mes - 1) / 6) + 1,
-            SemestreAnoNome = CONCAT(Ano, ' S', ((Mes - 1) / 6) + 1),
-            SemestreAnoNum = Ano * 10 + (((Mes - 1) / 6) + 1),
-            SemestreInicio = DATEFROMPARTS(Ano, (((Mes - 1) / 6)) * 6 + 1, 1),
-            SemestreFim = EOMONTH(DATEFROMPARTS(Ano, (((Mes - 1) / 6) + 1) * 6, 1)),
-            SemestreIndice = 2 * (Ano - @AnoInicial) + (((Mes - 1) / 6) + 1),
-            SemestresParaHoje = (Ano * 2 + (((Mes - 1) / 6) + 1)) - (@AnoAtual * 2 + (((@MesAtual - 1) / 6) + 1)),
-            SemestreAtual = IIF(Ano = @AnoAtual AND (((Mes - 1) / 6) + 1) = (((@MesAtual - 1) / 6) + 1), 'Semestre Atual', CONCAT(Ano, ' S', ((Mes - 1) / 6) + 1)),
+            SemestreNum = ((MesNum - 1) / 6) + 1,
+            SemestreAnoNome = CONCAT(Ano, ' S', ((MesNum - 1) / 6) + 1),
+            SemestreAnoNum = Ano * 10 + (((MesNum - 1) / 6) + 1),
+            SemestreInicio = DATEFROMPARTS(Ano, (((MesNum - 1) / 6)) * 6 + 1, 1),
+            SemestreFim = EOMONTH(DATEFROMPARTS(Ano, (((MesNum - 1) / 6) + 1) * 6, 1)),
+            SemestreIndice = 2 * (Ano - @AnoInicial) + (((MesNum - 1) / 6) + 1),
+            SemestresParaHoje = (Ano * 2 + (((MesNum - 1) / 6) + 1)) - (@AnoAtual * 2 + (((@MesAtual - 1) / 6) + 1)),
+            SemestreAtual = IIF(Ano = @AnoAtual AND (((MesNum - 1) / 6) + 1) = (((@MesAtual - 1) / 6) + 1), 'Semestre Atual', CONCAT(Ano, ' S', ((MesNum - 1) / 6) + 1)),
             
             -- Bimestre
-            BimestreNum = (Mes + 1) / 2,
-            BimestreAnoNome = CONCAT(Ano, ' B', (Mes + 1) / 2),
-            BimestreAnoNum = Ano * 10 + (Mes + 1) / 2,
-            BimestreInicio = DATEFROMPARTS(Ano, ((Mes + 1) / 2 - 1) * 2 + 1, 1),
-            BimestreFim = EOMONTH(DATEFROMPARTS(Ano, ((Mes + 1) / 2) * 2, 1)),
-            BimestreIndice = 6 * (Ano - @AnoInicial) + (Mes + 1) / 2,
-            BimestresParaHoje = (Ano * 6 + (Mes + 1) / 2) - (@AnoAtual * 6 + (@MesAtual + 1) / 2),
-            BimestreAtual = IIF(Ano = @AnoAtual AND (Mes + 1) / 2 = (@MesAtual + 1) / 2, 'Bimestre Atual', CONCAT(Ano, ' B', (Mes + 1) / 2)),
+            BimestreNum = (MesNum + 1) / 2,
+            BimestreAnoNome = CONCAT(Ano, ' B', (MesNum + 1) / 2),
+            BimestreAnoNum = Ano * 10 + (MesNum + 1) / 2,
+            BimestreInicio = DATEFROMPARTS(Ano, ((MesNum + 1) / 2 - 1) * 2 + 1, 1),
+            BimestreFim = EOMONTH(DATEFROMPARTS(Ano, ((MesNum + 1) / 2) * 2, 1)),
+            BimestreIndice = 6 * (Ano - @AnoInicial) + (MesNum + 1) / 2,
+            BimestresParaHoje = (Ano * 6 + (MesNum + 1) / 2) - (@AnoAtual * 6 + (@MesAtual + 1) / 2),
+            BimestreAtual = IIF(Ano = @AnoAtual AND (MesNum + 1) / 2 = (@MesAtual + 1) / 2, 'Bimestre Atual', CONCAT(Ano, ' B', (MesNum + 1) / 2)),
             
             -- Quinzena
-            QuinzenaNum = IIF(Dia <= 15, 1, 2),
-            QuinzenaMesAnoNome = CONCAT(Ano, ' ', MesNomeAbrev, ' Q', IIF(Dia <= 15, 1, 2)),
-            QuinzenaMesAnoNum = Ano * 100 + Mes * 10 + IIF(Dia <= 15, 1, 2),
-            QuinzenaInicio = IIF(Dia <= 15, DATEFROMPARTS(Ano, Mes, 1), DATEFROMPARTS(Ano, Mes, 16)),
-            QuinzenaFim = IIF(Dia <= 15, DATEFROMPARTS(Ano, Mes, 15), EOMONTH(Data)),
-            QuinzenaIndice = (Ano - @AnoInicial) * 24 + (Mes - 1) * 2 + IIF(Dia <= 15, 1, 2),
-            QuinzenaAtual = IIF(Mes = @MesAtual AND Ano = @AnoAtual AND IIF(Dia <= 15, 1, 2) = IIF(DAY(@DataAtual) <= 15, 1, 2), 'Quinzena Atual', CONCAT(Ano, ' ', MesNomeAbrev, ' Q', IIF(Dia <= 15, 1, 2)));
+            QuinzenaNum = IIF(DiaDoMes <= 15, 1, 2),
+            QuinzenaMesAnoNome = CONCAT(Ano, ' ', MesNomeAbrev, ' Q', IIF(DiaDoMes <= 15, 1, 2)),
+            QuinzenaMesAnoNum = Ano * 100 + MesNum * 10 + IIF(DiaDoMes <= 15, 1, 2),
+            QuinzenaInicio = IIF(DiaDoMes <= 15, DATEFROMPARTS(Ano, MesNum, 1), DATEFROMPARTS(Ano, MesNum, 16)),
+            QuinzenaFim = IIF(DiaDoMes <= 15, DATEFROMPARTS(Ano, MesNum, 15), EOMONTH(Data)),
+            QuinzenaIndice = (Ano - @AnoInicial) * 24 + (MesNum - 1) * 2 + IIF(DiaDoMes <= 15, 1, 2),
+            QuinzenaAtual = IIF(MesNum = @MesAtual AND Ano = @AnoAtual AND IIF(DiaDoMes <= 15, 1, 2) = IIF(DAY(@DataAtual) <= 15, 1, 2), 'Quinzena Atual', CONCAT(Ano, ' ', MesNomeAbrev, ' Q', IIF(DiaDoMes <= 15, 1, 2)));
         
         -- =================================================================
         -- ETAPA 5: Campos de fechamento e ISO Week
@@ -377,16 +373,16 @@ BEGIN
         INSERT INTO @FechamentoCalc (Data, FechamentoData, FechamentoAno, FechamentoMes)
         SELECT 
             Data,
-            IIF(Dia <= @DataFechamento, 
-                DATEFROMPARTS(Ano, Mes, @DataFechamento), 
-                DATEADD(MONTH, 1, DATEFROMPARTS(Ano, Mes, @DataFechamento))) AS FechamentoData,
-            YEAR(IIF(Dia <= @DataFechamento, 
-                DATEFROMPARTS(Ano, Mes, @DataFechamento), 
-                DATEADD(MONTH, 1, DATEFROMPARTS(Ano, Mes, @DataFechamento)))) AS FechamentoAno,
-            MONTH(IIF(Dia <= @DataFechamento, 
-                DATEFROMPARTS(Ano, Mes, @DataFechamento), 
-                DATEADD(MONTH, 1, DATEFROMPARTS(Ano, Mes, @DataFechamento)))) AS FechamentoMes
-        FROM dbo.CalendarioStaging;
+            IIF(DiaDoMes <= @DataFechamento, 
+                DATEFROMPARTS(Ano, MesNum, @DataFechamento), 
+                DATEADD(MONTH, 1, DATEFROMPARTS(Ano, MesNum, @DataFechamento))) AS FechamentoData,
+            YEAR(IIF(DiaDoMes <= @DataFechamento, 
+                DATEFROMPARTS(Ano, MesNum, @DataFechamento), 
+                DATEADD(MONTH, 1, DATEFROMPARTS(Ano, MesNum, @DataFechamento)))) AS FechamentoAno,
+            MONTH(IIF(DiaDoMes <= @DataFechamento, 
+                DATEFROMPARTS(Ano, MesNum, @DataFechamento), 
+                DATEADD(MONTH, 1, DATEFROMPARTS(Ano, MesNum, @DataFechamento)))) AS FechamentoMes
+        FROM dbo.Calendario;
         
         UPDATE c SET
             -- Fechamento (usando tabela auxiliar para otimização)
@@ -402,44 +398,44 @@ BEGIN
             -- ISO Week (segunda-feira como início)
             ISO_SemanaDoAno = DATEPART(ISO_WEEK, c.Data),
             ISO_Ano = CASE
-                WHEN DATEPART(ISO_WEEK, c.Data) > 50 AND c.Mes = 1  THEN c.Ano - 1
-                WHEN DATEPART(ISO_WEEK, c.Data) = 1  AND c.Mes = 12 THEN c.Ano + 1
+                WHEN DATEPART(ISO_WEEK, c.Data) > 50 AND c.MesNum = 1  THEN c.Ano - 1
+                WHEN DATEPART(ISO_WEEK, c.Data) = 1  AND c.MesNum = 12 THEN c.Ano + 1
                 ELSE c.Ano END,
             ISO_Semana = CONCAT(CASE
-                                    WHEN DATEPART(ISO_WEEK, c.Data) > 50 AND c.Mes = 1  THEN c.Ano - 1
-                                    WHEN DATEPART(ISO_WEEK, c.Data) = 1  AND c.Mes = 12 THEN c.Ano + 1
+                                    WHEN DATEPART(ISO_WEEK, c.Data) > 50 AND c.MesNum = 1  THEN c.Ano - 1
+                                    WHEN DATEPART(ISO_WEEK, c.Data) = 1  AND c.MesNum = 12 THEN c.Ano + 1
                                     ELSE c.Ano END,
                                 ' S', RIGHT('00' + CAST(DATEPART(ISO_WEEK, c.Data) AS VARCHAR(2)), 2)),
             ISO_SemanaInicio = DATEADD(DAY, 1 - ((DATEPART(WEEKDAY, c.Data) + 5) % 7 + 1), c.Data),
             ISO_SemanaFim = DATEADD(DAY, 7 - ((DATEPART(WEEKDAY, c.Data) + 5) % 7 + 1), c.Data),
             ISO_SemanaIndice = 52 * ((CASE
-                                        WHEN DATEPART(ISO_WEEK, c.Data) > 50 AND c.Mes = 1  THEN c.Ano - 1
-                                        WHEN DATEPART(ISO_WEEK, c.Data) = 1  AND c.Mes = 12 THEN c.Ano + 1
+                                        WHEN DATEPART(ISO_WEEK, c.Data) > 50 AND c.MesNum = 1  THEN c.Ano - 1
+                                        WHEN DATEPART(ISO_WEEK, c.Data) = 1  AND c.MesNum = 12 THEN c.Ano + 1
                                         ELSE c.Ano
                                       END) - @AnoInicial) + DATEPART(ISO_WEEK, c.Data),
             ISO_SemanasParaHoje = ((CASE
-                                        WHEN DATEPART(ISO_WEEK, c.Data) > 50 AND c.Mes = 1  THEN c.Ano - 1
-                                        WHEN DATEPART(ISO_WEEK, c.Data) = 1  AND c.Mes = 12 THEN c.Ano + 1
+                                        WHEN DATEPART(ISO_WEEK, c.Data) > 50 AND c.MesNum = 1  THEN c.Ano - 1
+                                        WHEN DATEPART(ISO_WEEK, c.Data) = 1  AND c.MesNum = 12 THEN c.Ano + 1
                                         ELSE c.Ano
                                     END) * 52 + DATEPART(ISO_WEEK, c.Data))
                                   - (@AnoAtual * 52 + DATEPART(ISO_WEEK, @DataAtual)),
             ISO_SemanaAtual = IIF(
                 DATEPART(ISO_WEEK, c.Data) = DATEPART(ISO_WEEK, @DataAtual) AND
                 (CASE
-                    WHEN DATEPART(ISO_WEEK, c.Data) > 50 AND c.Mes = 1  THEN c.Ano - 1
-                    WHEN DATEPART(ISO_WEEK, c.Data) = 1  AND c.Mes = 12 THEN c.Ano + 1
+                    WHEN DATEPART(ISO_WEEK, c.Data) > 50 AND c.MesNum = 1  THEN c.Ano - 1
+                    WHEN DATEPART(ISO_WEEK, c.Data) = 1  AND c.MesNum = 12 THEN c.Ano + 1
                     ELSE c.Ano
                  END) = @AnoAtual,
                 'Semana Atual',
                 CONCAT(
                     CASE
-                        WHEN DATEPART(ISO_WEEK, c.Data) > 50 AND c.Mes = 1  THEN c.Ano - 1
-                        WHEN DATEPART(ISO_WEEK, c.Data) = 1  AND c.Mes = 12 THEN c.Ano + 1
+                        WHEN DATEPART(ISO_WEEK, c.Data) > 50 AND c.MesNum = 1  THEN c.Ano - 1
+                        WHEN DATEPART(ISO_WEEK, c.Data) = 1  AND c.MesNum = 12 THEN c.Ano + 1
                         ELSE c.Ano
                     END, ' S', RIGHT('00' + CAST(DATEPART(ISO_WEEK, c.Data) AS VARCHAR(2)), 2)
                 )
             )
-        FROM dbo.CalendarioStaging c
+        FROM dbo.Calendario c
         INNER JOIN @FechamentoCalc f ON c.Data = f.Data;
         
         -- =================================================================
@@ -464,12 +460,12 @@ BEGIN
             YEAR(DATEADD(MONTH, -(@MesInicioAnoFiscal - 1), Data)) + 1 AS FY_AnoFinal,
             DATEPART(MONTH, DATEADD(MONTH, -(@MesInicioAnoFiscal - 1), Data)) AS FY_MesNumFiscal,
             CASE 
-                WHEN Mes >= @MesInicioAnoFiscal 
-                    THEN ((Mes - @MesInicioAnoFiscal) / 3) + 1
-                ELSE ((Mes + (12 - @MesInicioAnoFiscal)) / 3) + 1 
+                WHEN MesNum >= @MesInicioAnoFiscal 
+                    THEN ((MesNum - @MesInicioAnoFiscal) / 3) + 1
+                ELSE ((MesNum + (12 - @MesInicioAnoFiscal)) / 3) + 1 
             END AS FY_TrimestreNumFiscal,
-            ((Mes - @MesInicioAnoFiscal + 12) % 3) + 1 AS FY_MesDoTrimestreFiscal
-        FROM dbo.CalendarioStaging;
+            ((MesNum - @MesInicioAnoFiscal + 12) % 3) + 1 AS FY_MesDoTrimestreFiscal
+        FROM dbo.Calendario;
         
         -- Calcular trimestre fiscal atual para comparações
         DECLARE @CurrentFYTrimNum INT = CASE 
@@ -493,17 +489,17 @@ BEGIN
             FY_MesNome = c.MesNome,
             FY_MesNomeAbrev = c.MesNomeAbrev,
             FY_MesAnoNome = CONCAT(c.Ano, ' ', c.MesNome),
-            FY_MesAnoNum = c.Ano * 100 + c.Mes,
+            FY_MesAnoNum = c.Ano * 100 + c.MesNum,
             FY_MesesParaHoje = (CASE 
-                WHEN c.Mes >= @MesInicioAnoFiscal 
-                    THEN (c.Ano * 12 + c.Mes) 
-                ELSE ((c.Ano-1) * 12 + c.Mes + 12 - @MesInicioAnoFiscal)
+                WHEN c.MesNum >= @MesInicioAnoFiscal 
+                    THEN (c.Ano * 12 + c.MesNum) 
+                ELSE ((c.Ano-1) * 12 + c.MesNum + 12 - @MesInicioAnoFiscal)
             END) - (@AnoAtual * 12 + @MesAtual),
             FY_MesAtual = IIF(
                 (CASE 
-                    WHEN c.Mes >= @MesInicioAnoFiscal 
-                    THEN (c.Ano * 12 + c.Mes) 
-                ELSE ((c.Ano-1) * 12 + c.Mes + 12 - @MesInicioAnoFiscal)
+                    WHEN c.MesNum >= @MesInicioAnoFiscal 
+                    THEN (c.Ano * 12 + c.MesNum) 
+                ELSE ((c.Ano-1) * 12 + c.MesNum + 12 - @MesInicioAnoFiscal)
                 END) - (@AnoAtual * 12 + @MesAtual) = 0,
                 'Mês Atual', 
                 CONCAT(c.Ano, ' ', c.MesNome)
@@ -511,7 +507,7 @@ BEGIN
             
             -- Trimestre Fiscal
             FY_TrimestreNum = CASE 
-                WHEN c.Mes >= @MesInicioAnoFiscal 
+                WHEN c.MesNum >= @MesInicioAnoFiscal 
                     THEN (c.Ano - @AnoInicial) * 4 + f.FY_TrimestreNumFiscal
                 ELSE (c.Ano - @AnoInicial - 1) * 4 + f.FY_TrimestreNumFiscal
             END,
@@ -520,18 +516,18 @@ BEGIN
             FY_TrimestreAnoNome = CONCAT(c.Ano, ' T', f.FY_TrimestreNumFiscal),
             FY_TrimestreAnoNum = c.Ano * 100 + f.FY_TrimestreNumFiscal,
             FY_TrimestreInicio = DATEADD(MONTH, ((f.FY_TrimestreNumFiscal - 1) * 3),
-                DATEFROMPARTS(CASE WHEN c.Mes >= @MesInicioAnoFiscal THEN c.Ano ELSE c.Ano - 1 END, @MesInicioAnoFiscal, 1)),
+                DATEFROMPARTS(CASE WHEN c.MesNum >= @MesInicioAnoFiscal THEN c.Ano ELSE c.Ano - 1 END, @MesInicioAnoFiscal, 1)),
             FY_TrimestreFim = DATEADD(DAY, -1, DATEADD(MONTH, 3,
                               DATEADD(MONTH, ((f.FY_TrimestreNumFiscal - 1) * 3),
-                                DATEFROMPARTS(CASE WHEN c.Mes >= @MesInicioAnoFiscal THEN c.Ano ELSE c.Ano - 1 END, @MesInicioAnoFiscal, 1)))),
+                                DATEFROMPARTS(CASE WHEN c.MesNum >= @MesInicioAnoFiscal THEN c.Ano ELSE c.Ano - 1 END, @MesInicioAnoFiscal, 1)))),
             FY_TrimestresParaHoje = CASE 
-                WHEN c.Mes >= @MesInicioAnoFiscal 
+                WHEN c.MesNum >= @MesInicioAnoFiscal 
                     THEN (c.Ano - @AnoInicial) * 4 + f.FY_TrimestreNumFiscal
                 ELSE (c.Ano - @AnoInicial - 1) * 4 + f.FY_TrimestreNumFiscal
             END - @CurrentFYTrimNum,
             FY_TrimestreAtual = IIF(
                 (CASE 
-                    WHEN c.Mes >= @MesInicioAnoFiscal 
+                    WHEN c.MesNum >= @MesInicioAnoFiscal 
                     THEN (c.Ano - @AnoInicial) * 4 + f.FY_TrimestreNumFiscal
                 ELSE (c.Ano - @AnoInicial - 1) * 4 + f.FY_TrimestreNumFiscal
                 END) - @CurrentFYTrimNum = 0, 
@@ -540,10 +536,10 @@ BEGIN
             ),
             FY_DiaDoTrimestre = DATEDIFF(DAY,
                 DATEADD(MONTH, ((f.FY_TrimestreNumFiscal - 1) * 3),
-                    DATEFROMPARTS(CASE WHEN c.Mes >= @MesInicioAnoFiscal THEN c.Ano ELSE c.Ano - 1 END, @MesInicioAnoFiscal, 1)),
+                    DATEFROMPARTS(CASE WHEN c.MesNum >= @MesInicioAnoFiscal THEN c.Ano ELSE c.Ano - 1 END, @MesInicioAnoFiscal, 1)),
                 c.Data
             ) + 1
-        FROM dbo.CalendarioStaging c
+        FROM dbo.Calendario c
         INNER JOIN @FiscalCalc f ON c.Data = f.Data;
         
         -- =================================================================
@@ -556,16 +552,16 @@ BEGIN
         
         -- Feriados fixos
         ;WITH Anos AS (
-            SELECT DISTINCT Ano FROM dbo.CalendarioStaging
+            SELECT DISTINCT Ano FROM dbo.Calendario
         )
         INSERT INTO @Feriados (Data, Nome)
-        SELECT DATEFROMPARTS(a.Ano, f.Mes, f.Dia), f.Feriado
+        SELECT DATEFROMPARTS(a.Ano, f.MesNum, f.DiaDoMes), f.Feriado
         FROM Anos a
         CROSS JOIN @FeriadosFixos f;
         
         -- Feriados móveis (Páscoa)
         ;WITH Anos AS (
-            SELECT DISTINCT Ano FROM dbo.CalendarioStaging
+            SELECT DISTINCT Ano FROM dbo.Calendario
         ),
         Pascoa AS (
             SELECT 
@@ -587,13 +583,13 @@ BEGIN
         UPDATE c SET
             c.Feriado = 1,
             c.FeriadoNome = f.Nome
-        FROM dbo.CalendarioStaging c
+        FROM dbo.Calendario c
         INNER JOIN @Feriados f ON f.Data = c.Data;
         
         -- Calcular dias úteis
         PRINT 'Calculando dias úteis...';
         
-        UPDATE dbo.CalendarioStaging SET
+        UPDATE dbo.Calendario SET
             DiaUtil = CASE
                 WHEN DiaDaSemanaNome IN (N'sábado', N'domingo') THEN 0
                 WHEN ISNULL(Feriado, 0) = 1 THEN 0
@@ -603,151 +599,19 @@ BEGIN
         -- Próximo dia útil (otimizado com OUTER APPLY)
         UPDATE c SET
             ProximoDiaUtil = prox.Data
-        FROM dbo.CalendarioStaging c
+        FROM dbo.Calendario c
         OUTER APPLY (
             SELECT TOP 1 Data
-            FROM dbo.CalendarioStaging c2
+            FROM dbo.Calendario c2
             WHERE c2.Data > c.Data AND c2.DiaUtil = 1
             ORDER BY c2.Data
         ) prox;
         
         -- Tornar DataIndice NOT NULL
-        ALTER TABLE dbo.CalendarioStaging ALTER COLUMN DataIndice INT NOT NULL;
-
-        -- =================================================================
-        -- ETAPA 8: Gerar tabela final dbo.Calendario sem Dia/Mes
-        -- =================================================================
-        PRINT 'Gerando tabela final dbo.Calendario sem colunas Dia e Mes...';
-
-        DROP TABLE IF EXISTS dbo.Calendario;
-
-        SELECT 
-            Data,
-            Ano,
-            MesNome,
-            MesNomeAbrev,
-            DiaDaSemanaNome,
-            DiaDaSemanaAbrev,
-            DataIndice,
-            DiasParaHoje,
-            DataAtual,
-            AnoInicio,
-            AnoFim,
-            AnoIndice,
-            AnoDescrescenteNome,
-            AnoDescrescenteNum,
-            AnosParaHoje,
-            AnoAtual,
-            DiaDoMes,
-            DiaDoAno,
-            DiaDaSemanaNum,
-            MesNum,
-            MesAnoNome,
-            MesAnoNum,
-            MesDiaNum,
-            MesDiaNome,
-            MesInicio,
-            MesFim,
-            MesIndice,
-            MesesParaHoje,
-            MesAtual,
-            MesAtualAbrev,
-            MesAnoAtual,
-            TrimestreNum,
-            TrimestreNome,
-            TrimestreAnoNome,
-            TrimestreAnoNum,
-            TrimestreInicio,
-            TrimestreFim,
-            TrimestreIndice,
-            TrimestresParaHoje,
-            TrimestreAtual,
-            TrimestreAnoAtual,
-            MesDoTrimestre,
-            SemanaDoAno,
-            SemanaAno,
-            SemanaDoMes,
-            SemanaInicio,
-            SemanaFim,
-            SemanaIndice,
-            SemanasParaHoje,
-            SemanaAtual,
-            SemestreNum,
-            SemestreAnoNome,
-            SemestreAnoNum,
-            SemestreInicio,
-            SemestreFim,
-            SemestreIndice,
-            SemestresParaHoje,
-            SemestreAtual,
-            BimestreNum,
-            BimestreAnoNome,
-            BimestreAnoNum,
-            BimestreInicio,
-            BimestreFim,
-            BimestreIndice,
-            BimestresParaHoje,
-            BimestreAtual,
-            QuinzenaNum,
-            QuinzenaMesAnoNome,
-            QuinzenaMesAnoNum,
-            QuinzenaInicio,
-            QuinzenaFim,
-            QuinzenaIndice,
-            QuinzenaAtual,
-            FechamentoAno,
-            FechamentoRef,
-            FechamentoIndice,
-            FechamentoMesNome,
-            FechamentoMesNomeAbrev,
-            FechamentoMesNum,
-            FechamentoMesAnoNome,
-            FechamentoMesAnoNum,
-            ISO_Semana,
-            ISO_SemanaDoAno,
-            ISO_Ano,
-            ISO_SemanaInicio,
-            ISO_SemanaFim,
-            ISO_SemanaIndice,
-            ISO_SemanasParaHoje,
-            ISO_SemanaAtual,
-            FY_AnoInicial,
-            FY_AnoFinal,
-            FY_Ano,
-            FY_AnoInicio,
-            FY_AnoFim,
-            FY_AnosParaHoje,
-            FY_AnoAtual,
-            FY_MesNum,
-            FY_MesNome,
-            FY_MesNomeAbrev,
-            FY_MesAnoNome,
-            FY_MesAnoNum,
-            FY_MesesParaHoje,
-            FY_MesAtual,
-            FY_TrimestreNum,
-            FY_TrimestreNome,
-            FY_MesDoTrimestre,
-            FY_TrimestreAnoNome,
-            FY_TrimestreAnoNum,
-            FY_TrimestreInicio,
-            FY_TrimestreFim,
-            FY_TrimestresParaHoje,
-            FY_TrimestreAtual,
-            FY_DiaDoTrimestre,
-            Feriado,
-            FeriadoNome,
-            DiaUtil,
-            ProximoDiaUtil
-        INTO dbo.Calendario
-        FROM dbo.CalendarioStaging;
-
-        -- Garantir DataIndice NOT NULL e PK na tabela final
         ALTER TABLE dbo.Calendario ALTER COLUMN DataIndice INT NOT NULL;
-        ALTER TABLE dbo.Calendario ADD CONSTRAINT PK_Calendario PRIMARY KEY CLUSTERED (Data);
-
+        
         -- =================================================================
-        -- ETAPA 9: Estatísticas e finalização
+        -- ETAPA 8: Estatísticas e finalização
         -- =================================================================
         SELECT @TotalRegistros = COUNT(*) FROM dbo.Calendario;
         
@@ -781,6 +645,7 @@ BEGIN
         UNION
         SELECT * FROM ultimas
         ORDER BY Data ASC;
+
 
     END TRY
     BEGIN CATCH
